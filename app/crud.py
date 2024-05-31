@@ -15,13 +15,13 @@ def get_all(db: Session):
     return db.query(entity.Movie).all()
 
 
-def get_by_id(db: Session):
-    pass
+def get_by_id(db: Session, movie_id: int):
+    return db.query(entity.Movie).get(movie_id)
 
 
-def get_by_year(db: Session):
-    pass
+def get_by_year(db: Session, movie_year: int):
+    return db.query(entity.Movie).filter(entity.Movie.year == movie_year).all()
 
 
-def get_by_title(db: Session):
-    pass
+def get_by_title(db: Session, movie_title: str):
+    return db.query(entity.Movie).filter(entity.Movie.title == movie_title).all()
