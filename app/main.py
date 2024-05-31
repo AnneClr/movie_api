@@ -1,30 +1,28 @@
 from typing import List
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
+from app import crud
 import app.schema as schema
+from .database import SessionLocal, engine
+from app import database
+from sqlalchemy.orm import Session
+
+# Mise en place de l'ORM, création d'un engine
+database.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
 
-# @app.get("/")
-# async def root()-> schema.Movie:
-#     return schema.Movie(title='Dune : Part Two', year = 2024) 
+# Dependency
+# On crée une connexion avec la base de données qu'on stocke dans db
+# Le close est géré directement dans cette fonction
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
-# @app.get("/")
-# async def get_one()-> schema.Movie:
-#     return schema.Movie(title='Dune : Part Two', year = 2024) 
 
-# # Méthode plus souple car paas besoin d'un objet Movie au sens strict en entrée et sortie
-# @app.get("/2", response_model=schema.Movie) 
-# async def get_two():
-#     return {"title":'Dune : Part One', "year" : 2021 }
-
-# @app.get("/movies", response_model=List[schema.Movie])
-# async def get_all():
-#     return [
-#         schema.Movie(title='Dune : Part Two', year = 2024),
-#         {"title":'Dune : Part One', "year" : 2021 }
-#             ]
-    
-# @app.post("/")
-# async def add(movie:schema.Movie):
-#     return True
+@app.get("/movies", response_model=List[schema.Movie])
+def get_all(db: Session = Depends(get_db)):
+    return crud.get_all(db)
